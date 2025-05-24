@@ -344,7 +344,7 @@ static uint32_t canvas_getheight(obs_weak_canvas_t *weak);
 static inline void get_scene_dimensions(const obs_sceneitem_t *item, float *x, float *y)
 {
 	obs_scene_t *parent = item->parent;
-	if (!parent) {
+	if (!parent || (parent->is_group && !parent->source->canvas)) {
 		*x = (float)obs->data.main_canvas->mix->ovi.base_width;
 		*y = (float)obs->data.main_canvas->mix->ovi.base_height;
 	} else if (parent->is_group) {
@@ -1996,8 +1996,8 @@ static inline void duplicate_item_data(struct obs_scene_item *dst, struct obs_sc
 
 obs_scene_t *obs_scene_duplicate(obs_scene_t *scene, const char *name, enum obs_scene_duplicate_type type)
 {
-	bool make_unique = ((int)type & (1 << 0)) != 0;
-	bool make_private = ((int)type & (1 << 1)) != 0;
+	bool make_unique = type == OBS_SCENE_DUP_COPY || type == OBS_SCENE_DUP_PRIVATE_COPY;
+	bool make_private = type == OBS_SCENE_DUP_PRIVATE_REFS || type == OBS_SCENE_DUP_PRIVATE_COPY;
 	obs_scene_item_ptr_array_t items;
 	struct obs_scene *new_scene;
 	struct obs_scene_item *item;
